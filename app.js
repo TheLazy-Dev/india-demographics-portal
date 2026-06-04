@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const valFemalePop = document.getElementById('val-female-pop');
   const pctFemaleShare = document.getElementById('pct-female-share');
   const valSexRatio = document.getElementById('val-sex-ratio');
+  const pctRatioChange = document.getElementById('pct-ratio-change');
   
   // Toggles & Filters
   const btnFilterAll = document.getElementById('filter-all');
@@ -54,6 +55,52 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentSortOrder = 'desc'; // 'asc' or 'desc'
 
   // --- Helper Functions ---
+
+  // Helper to update text with a premium visual transition
+  function updateTextWithAnimation(element, newValue) {
+    if (!element || element.textContent === newValue) return;
+    element.classList.remove('metric-value-update');
+    void element.offsetWidth; // force reflow
+    element.textContent = newValue;
+    element.classList.add('metric-value-update');
+  }
+
+  // Helper to update text and title with a premium visual transition
+  function updateValueAndTitleWithAnimation(element, newValue, newTitle) {
+    if (!element) return;
+    if (element.textContent === newValue && element.title === newTitle) return;
+    element.classList.remove('metric-value-update');
+    void element.offsetWidth; // force reflow
+    element.textContent = newValue;
+    element.title = newTitle;
+    element.classList.add('metric-value-update');
+  }
+
+  // Helper to update HTML with a premium visual transition
+  function updateHtmlWithAnimation(element, newHtml) {
+    if (!element || element.innerHTML === newHtml) return;
+    element.classList.remove('metric-value-update');
+    void element.offsetWidth; // force reflow
+    element.innerHTML = newHtml;
+    element.classList.add('metric-value-update');
+  }
+
+  // Helper to create trend indicator HTML (red/green up/down arrow)
+  function getTrendIndicatorHTML(currentVal, baselineVal, isPercentage = false) {
+    const diff = currentVal - baselineVal;
+    if (isPercentage) {
+      const pctChange = ((diff / baselineVal) * 100).toFixed(2);
+      const sign = pctChange >= 0 ? '+' : '';
+      const dirClass = pctChange >= 0 ? 'up' : 'down';
+      const arrow = pctChange >= 0 ? '▲' : '▼';
+      return `<span class="trend-indicator ${dirClass}">${arrow} ${sign}${pctChange}%</span>`;
+    } else {
+      const sign = diff >= 0 ? '+' : '';
+      const dirClass = diff >= 0 ? 'up' : 'down';
+      const arrow = diff >= 0 ? '▲' : '▼';
+      return `<span class="trend-indicator ${dirClass}">${arrow} ${sign}${Math.round(diff)}</span>`;
+    }
+  }
 
   // Standard Indian Number Formatter (e.g. 12,34,56,789)
   function formatIndianNumber(num) {
@@ -128,51 +175,57 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Render Functions ---
 
   // 1. Render National Cards
-  function renderNationalCards() {
-    const regionData = window.DEMOGRAPHICS_DATA[selectedRegion];
+  function renderNationalCards(regionName = selectedRegion) {
+    const regionData = window.DEMOGRAPHICS_DATA[regionName];
     if (!regionData) return;
 
     const total = regionData['Person'][currentYear];
     const male = regionData['Male'][currentYear];
     const female = regionData['Female'][currentYear];
     
-    // Growth Pop since 2011
-    const total2011 = regionData['Person'][2011];
-    const growthPercent = (((total - total2011) / total2011) * 100).toFixed(2);
-    
     // Male/Female splits
     const malePct = ((male / total) * 100).toFixed(1);
     const femalePct = ((female / total) * 100).toFixed(1);
-    
-    // Sex ratio
     const sexRatio = Math.round((female / male) * 1000);
 
-    // Apply values to UI
-    valTotalPop.textContent = formatAbbreviated(total);
-    valTotalPop.title = formatFullNumber(total);
-    pctGrowthPop.textContent = `+${growthPercent}% growth since 2011`;
+    // Growth Pop since 2011
+    const total2011 = regionData['Person'][2011];
     
-    valMalePop.textContent = formatAbbreviated(male);
-    valMalePop.title = formatFullNumber(male);
-    pctMaleShare.textContent = `${malePct}% of total population`;
+    // Male/Female baseline splits
+    const male2011 = regionData['Male'][2011];
+    const female2011 = regionData['Female'][2011];
+    const sexRatio2011 = Math.round((female2011 / male2011) * 1000);
     
-    valFemalePop.textContent = formatAbbreviated(female);
-    valFemalePop.title = formatFullNumber(female);
-    pctFemaleShare.textContent = `${femalePct}% of total population`;
+    // Generate trend indicators HTML
+    const totalTrendHTML = getTrendIndicatorHTML(total, total2011, true);
+    const maleTrendHTML = getTrendIndicatorHTML(male, male2011, true);
+    const femaleTrendHTML = getTrendIndicatorHTML(female, female2011, true);
+    const sexRatioTrendHTML = getTrendIndicatorHTML(sexRatio, sexRatio2011, false);
+
+    // Apply values to UI with premium animation transitions
+    updateValueAndTitleWithAnimation(valTotalPop, formatAbbreviated(total), formatFullNumber(total));
+    updateHtmlWithAnimation(pctGrowthPop, `${totalTrendHTML} since 2011`);
     
-    valSexRatio.textContent = sexRatio;
+    updateValueAndTitleWithAnimation(valMalePop, formatAbbreviated(male), formatFullNumber(male));
+    updateHtmlWithAnimation(pctMaleShare, `${maleTrendHTML} (${malePct}% of total)`);
+    
+    updateValueAndTitleWithAnimation(valFemalePop, formatAbbreviated(female), formatFullNumber(female));
+    updateHtmlWithAnimation(pctFemaleShare, `${femaleTrendHTML} (${femalePct}% of total)`);
+    
+    updateTextWithAnimation(valSexRatio, sexRatio.toString());
+    updateHtmlWithAnimation(pctRatioChange, `${sexRatioTrendHTML} since 2011`);
 
     // Update labels dynamically
-    const regionName = selectedRegion === 'India' ? 'India' : selectedRegion;
-    document.querySelector('#metric-pop .metric-label').textContent = `${regionName} Population`;
-    document.querySelector('#metric-male .metric-label').textContent = `${regionName} Male Pop`;
-    document.querySelector('#metric-female .metric-label').textContent = `${regionName} Female Pop`;
-    document.querySelector('#metric-ratio .metric-label').textContent = `${regionName} Sex Ratio`;
+    const displayName = regionName === 'India' ? 'India' : regionName;
+    updateTextWithAnimation(document.querySelector('#metric-pop .metric-label'), `${displayName} Population`);
+    updateTextWithAnimation(document.querySelector('#metric-male .metric-label'), `${displayName} Male Pop`);
+    updateTextWithAnimation(document.querySelector('#metric-female .metric-label'), `${displayName} Female Pop`);
+    updateTextWithAnimation(document.querySelector('#metric-ratio .metric-label'), `${displayName} Sex Ratio`);
 
     // Update national badges
     const badges = document.querySelectorAll('.badge-national');
     badges.forEach(badge => {
-      if (selectedRegion === 'India') {
+      if (regionName === 'India') {
         badge.textContent = 'National Level';
         badge.style.background = 'var(--primary-light)';
         badge.style.borderColor = 'rgba(99, 102, 241, 0.4)';
@@ -245,14 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 4. Render Social Categories (SC/ST)
-  function renderSocialCategories() {
+  function renderSocialCategories(regionName = selectedRegion) {
     socialGridContainer.innerHTML = '';
-    const regionData = window.DEMOGRAPHICS_DATA[selectedRegion];
+    const regionData = window.DEMOGRAPHICS_DATA[regionName];
     if (!regionData) return;
 
     const total = regionData['Person'][currentYear];
-    const regionName = selectedRegion === 'India' ? 'India' : selectedRegion;
-    document.querySelector('#social-categories-summary .chart-title').textContent = `Social Demographics & Categories (${regionName})`;
+    const displayName = regionName === 'India' ? 'India' : regionName;
+    document.querySelector('#social-categories-summary .chart-title').textContent = `Social Demographics & Categories (${displayName})`;
 
     Object.entries(window.SOCIAL_CATEGORIES).forEach(([key, category]) => {
       const rawCount = Math.round((category.percentage / 100) * total);
@@ -262,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       item.innerHTML = `
         <div class="social-title">${key}</div>
         <div class="social-pct">${category.percentage}%</div>
-        <div class="social-abs" title="Estimated absolute count based on ${currentYear} population in ${regionName}">${formatFullNumber(rawCount)} est.</div>
+        <div class="social-abs" title="Estimated absolute count based on ${currentYear} population in ${displayName}">${formatFullNumber(rawCount)} est.</div>
         <div class="social-desc">${category.note}</div>
       `;
       socialGridContainer.appendChild(item);
@@ -383,6 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
         selectRegion(row.state);
       });
 
+      tr.addEventListener('mouseenter', () => {
+        previewRegion(row.state);
+      });
+
+      tr.addEventListener('mouseleave', () => {
+        previewRegion(null);
+      });
+
       tr.innerHTML = `
         <td class="col-rank">${rank}</td>
         <td class="col-state">${row.state}${row.isUT ? ' <span style="font-size:0.7rem; color:var(--primary); background:rgba(99,102,241,0.1); padding:1px 5px; border-radius:4px; margin-left:4px;">UT</span>' : ''}</td>
@@ -423,22 +484,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 6. Draw Premium Interactive SVG Line Charts
-  function drawSVGCharts() {
-    drawPopulationChart();
-    drawSexRatioChart();
+  function drawSVGCharts(regionName = selectedRegion) {
+    drawPopulationChart(regionName);
+    drawSexRatioChart(regionName);
   }
 
-  function drawPopulationChart() {
+  function drawPopulationChart(regionName = selectedRegion) {
     const container = document.getElementById('pop-trend-chart-container');
     container.innerHTML = '';
     
-    const regionData = window.DEMOGRAPHICS_DATA[selectedRegion];
+    const regionData = window.DEMOGRAPHICS_DATA[regionName];
     if (!regionData) return;
 
     // Update dynamic title
     const titleEl = document.querySelector('#chart-population-trend .chart-title');
     if (titleEl) {
-      titleEl.textContent = `${selectedRegion} Population Growth Trend (2011 – 2026)`;
+      titleEl.textContent = `${regionName} Population Growth Trend (2011 – 2026)`;
     }
     
     const width = container.clientWidth || 550;
@@ -579,17 +640,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function drawSexRatioChart() {
+  function drawSexRatioChart(regionName = selectedRegion) {
     const container = document.getElementById('ratio-trend-chart-container');
     container.innerHTML = '';
     
-    const regionData = window.DEMOGRAPHICS_DATA[selectedRegion];
+    const regionData = window.DEMOGRAPHICS_DATA[regionName];
     if (!regionData) return;
 
     // Update dynamic title
     const titleEl = document.querySelector('#chart-ratio-trend .chart-title');
     if (titleEl) {
-      titleEl.textContent = `${selectedRegion} Sex Ratio Trajectory (2011 – 2026)`;
+      titleEl.textContent = `${regionName} Sex Ratio Trajectory (2011 – 2026)`;
     }
     
     const width = container.clientWidth || 550;
@@ -831,6 +892,52 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSocialCategories();
     renderTable();
     drawSVGCharts();
+    
+    // Clear preview timeouts and row hover highlights
+    clearTimeout(previewTimeout);
+    highlightTableRow(null);
+  }
+
+  let previewTimeout;
+
+  // Debounced preview helper to dynamically load a region's demographics on hover
+  function previewRegion(regionName) {
+    clearTimeout(previewTimeout);
+    
+    previewTimeout = setTimeout(() => {
+      const targetRegion = regionName || selectedRegion;
+      
+      // Update UI cards and charts with previewed region metrics
+      renderNationalCards(targetRegion);
+      renderSocialCategories(targetRegion);
+      drawSVGCharts(targetRegion);
+      
+      // Highlight the corresponding row in the table
+      highlightTableRow(regionName ? targetRegion : null);
+    }, 60); // 60ms debounce for high performance and buttery smooth feel
+  }
+
+  // Highlights corresponding table row when suggestions list is hovered
+  function highlightTableRow(regionName) {
+    // Remove existing highlights
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+      row.classList.remove('hovered-row');
+    });
+    
+    if (!regionName || regionName === 'India') return;
+    
+    // Find the row for this region name
+    const targetRow = Array.from(rows).find(row => {
+      const stateCell = row.querySelector('.col-state');
+      if (!stateCell) return false;
+      const stateName = stateCell.textContent.split('UT')[0].trim();
+      return stateName.toLowerCase() === regionName.toLowerCase();
+    });
+    
+    if (targetRow) {
+      targetRow.classList.add('hovered-row');
+    }
   }
 
   // Render Autocomplete Suggestions Dropdown
@@ -856,6 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (matches.length === 0) {
       searchDropdown.style.display = 'none';
+      document.body.classList.remove('search-dropdown-open');
       return;
     }
 
@@ -879,12 +987,19 @@ document.addEventListener('DOMContentLoaded', () => {
       item.addEventListener('click', () => {
         selectRegion(region);
         searchDropdown.style.display = 'none';
+        document.body.classList.remove('search-dropdown-open');
+      });
+
+      // Hover preview handler
+      item.addEventListener('mouseenter', () => {
+        previewRegion(region);
       });
 
       searchDropdown.appendChild(item);
     });
 
     searchDropdown.style.display = 'block';
+    document.body.classList.add('search-dropdown-open');
   }
 
   // --- Event Listeners Setup ---
@@ -910,7 +1025,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     if (!stateSearch.contains(e.target) && !searchDropdown.contains(e.target)) {
       searchDropdown.style.display = 'none';
+      document.body.classList.remove('search-dropdown-open');
+      previewRegion(null);
     }
+  });
+
+  // Restore preview when mouse leaves the dropdown suggestions card
+  searchDropdown.addEventListener('mouseleave', () => {
+    previewRegion(null);
   });
 
   // Keyboard navigation for search dropdown
@@ -935,6 +1057,9 @@ document.addEventListener('DOMContentLoaded', () => {
       items[activeIndex].classList.add('active-highlight');
       items[activeIndex].style.background = 'var(--primary-light)';
       items[activeIndex].scrollIntoView({ block: 'nearest' });
+      
+      const regionName = items[activeIndex].querySelector('strong').textContent.trim();
+      previewRegion(regionName);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (activeIndex !== -1) {
@@ -945,6 +1070,9 @@ document.addEventListener('DOMContentLoaded', () => {
       items[activeIndex].classList.add('active-highlight');
       items[activeIndex].style.background = 'var(--primary-light)';
       items[activeIndex].scrollIntoView({ block: 'nearest' });
+      
+      const regionName = items[activeIndex].querySelector('strong').textContent.trim();
+      previewRegion(regionName);
     } else if (e.key === 'Enter') {
       if (activeIndex !== -1) {
         e.preventDefault();
@@ -952,6 +1080,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (e.key === 'Escape') {
       searchDropdown.style.display = 'none';
+      document.body.classList.remove('search-dropdown-open');
+      previewRegion(null);
     }
   });
 
