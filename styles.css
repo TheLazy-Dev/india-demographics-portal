@@ -1061,23 +1061,23 @@ body.search-dropdown-open .metric-card:hover {
   box-shadow: var(--shadow-md);
 }
 
-.timeline-header-container {
+.census-timeline-header-container {
   margin-bottom: 2rem;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.75rem;
 }
 
-.timeline-title-group h2 {
+.census-timeline-title-group h2 {
   font-size: 1.25rem;
   font-weight: 700;
 }
 
-.timeline-title-group p {
+.census-timeline-title-group p {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
 
-.timeline-container {
+.census-timeline-container {
   position: relative;
   padding-left: 2rem;
   display: flex;
@@ -1086,7 +1086,7 @@ body.search-dropdown-open .metric-card:hover {
 }
 
 /* Timeline Vertical Line */
-.timeline-container::before {
+.census-timeline-container::before {
   content: '';
   position: absolute;
   left: 7px;
@@ -1096,11 +1096,11 @@ body.search-dropdown-open .metric-card:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.timeline-item {
+.census-timeline-item {
   position: relative;
 }
 
-.timeline-dot {
+.census-timeline-dot {
   position: absolute;
   left: -2rem;
   top: 6px;
@@ -1132,7 +1132,7 @@ body.search-dropdown-open .metric-card:hover {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.timeline-content {
+.census-timeline-content {
   background: rgba(31, 41, 55, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-md);
@@ -1140,14 +1140,14 @@ body.search-dropdown-open .metric-card:hover {
   transition: var(--transition-smooth);
 }
 
-.timeline-content:hover {
+.census-timeline-content:hover {
   transform: translateX(4px);
   background: rgba(31, 41, 55, 0.5);
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: var(--shadow-md);
 }
 
-.timeline-time-badge {
+.census-timeline-time-badge {
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 700;
@@ -1160,21 +1160,21 @@ body.search-dropdown-open .metric-card:hover {
   margin-bottom: 0.5rem;
 }
 
-.timeline-event-title {
+.census-timeline-event-title {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
-.timeline-event-desc {
+.census-timeline-event-desc {
   font-size: 0.825rem;
   color: var(--text-secondary);
   margin-bottom: 1rem;
   line-height: 1.6;
 }
 
-.timeline-link {
+.census-timeline-link {
   color: var(--primary);
   font-size: 0.8rem;
   font-weight: 700;
@@ -1185,7 +1185,7 @@ body.search-dropdown-open .metric-card:hover {
   transition: var(--transition-smooth);
 }
 
-.timeline-link:hover {
+.census-timeline-link:hover {
   color: #818cf8;
   text-decoration: underline;
 }
