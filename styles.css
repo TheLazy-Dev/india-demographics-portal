@@ -128,7 +128,7 @@ body {
   padding: 1rem 1.25rem;
   margin-top: 1.25rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   font-size: 0.875rem;
   color: #fbbf24;
@@ -454,7 +454,7 @@ body {
 }
 
 .metric-value {
-  font-size: 1.85rem;
+  font-size: clamp(1.4rem, 5vw, 1.85rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
@@ -1011,6 +1011,44 @@ table.demographics-table {
 
   .app-container {
     padding: 1rem;
+  }
+
+  .census-pause-section,
+  .resources-section {
+    padding: 1.25rem;
+  }
+
+  .chart-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Year slider ticks: show only key 5-year intervals to prevent mobile overflow */
+  .year-ticks span {
+    display: none;
+  }
+  .year-ticks span:nth-child(1),
+  .year-ticks span:nth-child(6),
+  .year-ticks span:nth-child(11),
+  .year-ticks span:nth-child(16) {
+    display: inline-block;
+  }
+
+  .chart-container {
+    height: 240px;
+  }
+
+  .chart-card {
+    padding: 1rem;
+  }
+
+  .literacy-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .resources-grid {
+    grid-template-columns: 1fr;
   }
 }
 

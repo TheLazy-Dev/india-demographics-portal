@@ -1124,13 +1124,22 @@ document.addEventListener('DOMContentLoaded', () => {
     drawSVGCharts(); // Re-render charts to update axis labels
   });
 
-  // Chart responsiveness (redraw SVGs on window resize)
+  // Chart responsiveness via ResizeObserver to handle layout reflows accurately
   let resizeTimeout;
-  window.addEventListener('resize', () => {
+  const chartContainers = [
+    document.getElementById('pop-trend-chart-container'),
+    document.getElementById('ratio-trend-chart-container')
+  ];
+
+  const resizeObserver = new ResizeObserver(() => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       drawSVGCharts();
-    }, 250);
+    }, 100);
+  });
+
+  chartContainers.forEach(container => {
+    if (container) resizeObserver.observe(container);
   });
 
   // --- Initializing App ---
